@@ -1,0 +1,30 @@
+# CELL ONE
+!pip3 install pytrends
+
+import pandas as pd
+import requests
+import json
+from pytrends.request import TrendReq
+#CELL THREE
+name = input("Please Type Trend Word(ex: New York): ")
+keyword=name#"Olympic Games"
+url = f'https://en.wikipedia.org/w/api.php?action=query&prop=pageviews&titles={keyword}&format=json'
+
+payload={}
+headers = {}
+
+response = requests.request("GET", url, headers=headers, data=payload)
+getjson = json.loads(response.text)
+df = pd.DataFrame(columns = ['Date', 'Hits'])
+for k,item in getjson['query']['pages'].items():
+  for j,value in item['pageviews'].items():
+    data = {'Date': j, 'Hits': value}
+    df = df.append(data, ignore_index=True)
+df.plot.line(x='Date',y='Hits',ylabel='Views',figsize=(10,5),title='Wiki PageView Trend for ' + keyword)
+
+
+pytrends = TrendReq(hl='en-US', tz=360)
+kw_list = [keyword]
+pytrends.build_payload(kw_list, cat=0, timeframe='today 3-m', geo='', gprop='')
+df2 = pytrends.interest_over_time()
+df2.plot.line(ylabel='Views',figsize=(10,5),title='Google Trend for ' + keyword)
